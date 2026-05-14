@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DAO Governance Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #f3efe5;
+        --panel: rgba(255, 252, 247, 0.82);
+        --panel-strong: rgba(255, 252, 247, 0.96);
+        --text: #1f2d1d;
+        --muted: #5a6856;
+        --line: rgba(31, 45, 29, 0.12);
+        --accent: #c4532d;
+        --success: #1e7f4f;
+        --danger: #8d2f2f;
+        --shadow: 0 24px 50px rgba(64, 45, 24, 0.12);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Space Grotesk", sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(circle at top left, rgba(196, 83, 45, 0.22), transparent 32%),
+          radial-gradient(circle at top right, rgba(30, 127, 79, 0.18), transparent 28%),
+          linear-gradient(180deg, #f6f1e8 0%, #efe5d5 100%);
+      }
+
+      .shell {
+        width: min(1180px, calc(100% - 32px));
+        margin: 32px auto 56px;
+      }
+
+      .hero {
+        display: grid;
+        gap: 16px;
+        padding: 28px;
+        border: 1px solid var(--line);
+        border-radius: 28px;
+        background: var(--panel);
+        backdrop-filter: blur(14px);
+        box-shadow: var(--shadow);
+      }
+
+      .hero h1 {
+        margin: 0;
+        font-size: clamp(2rem, 5vw, 4.2rem);
+        line-height: 0.95;
+        max-width: 10ch;
+      }
+
+      .hero p {
+        margin: 0;
+        color: var(--muted);
+        max-width: 64ch;
+      }
+
+      .hero-top {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        align-items: flex-start;
+      }
+
+      .hero-chip {
+        padding: 10px 14px;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.5);
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.85rem;
+      }
+
+      .button-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      button,
+      input {
+        font: inherit;
+      }
+
+      button {
+        border: none;
+        border-radius: 16px;
+        padding: 13px 18px;
+        cursor: pointer;
+        transition: transform 150ms ease, box-shadow 150ms ease, opacity 150ms ease;
+      }
+
+      button:hover {
+        transform: translateY(-1px);
+      }
+
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .primary {
+        background: var(--accent);
+        color: #fffaf6;
+        box-shadow: 0 12px 20px rgba(196, 83, 45, 0.25);
+      }
+
+      .secondary {
+        background: rgba(255, 255, 255, 0.65);
+        border: 1px solid var(--line);
+        color: var(--text);
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(12, 1fr);
+        gap: 18px;
+        margin-top: 20px;
+      }
+
+      .card {
+        grid-column: span 12;
+        padding: 22px;
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        background: var(--panel-strong);
+        box-shadow: var(--shadow);
+      }
+
+      .card h2 {
+        margin: 0 0 14px;
+        font-size: 1.1rem;
+      }
+
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .stat {
+        padding: 16px;
+        border-radius: 18px;
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.7);
+      }
+
+      .stat-label {
+        display: block;
+        color: var(--muted);
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+      }
+
+      .mono {
+        font-family: "IBM Plex Mono", monospace;
+        word-break: break-all;
+      }
+
+      .controls {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 12px;
+      }
+
+      input {
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 14px 16px;
+        background: rgba(255, 255, 255, 0.85);
+      }
+
+      .status {
+        min-height: 24px;
+        margin-top: 12px;
+        color: var(--muted);
+      }
+
+      .proposal-list {
+        display: grid;
+        gap: 14px;
+      }
+
+      .proposal {
+        padding: 18px;
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.72);
+      }
+
+      .proposal-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: center;
+      }
+
+      .proposal-title {
+        margin: 0;
+        font-size: 1rem;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: rgba(31, 45, 29, 0.08);
+        font-size: 0.85rem;
+      }
+
+      .proposal-meta,
+      .proposal-results {
+        margin-top: 12px;
+        color: var(--muted);
+        display: grid;
+        gap: 6px;
+      }
+
+      .vote-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 14px;
+      }
+
+      .vote-for {
+        background: var(--success);
+        color: white;
+      }
+
+      .vote-against {
+        background: var(--danger);
+        color: white;
+      }
+
+      .vote-abstain {
+        background: #304d63;
+        color: white;
+      }
+
+      .empty {
+        padding: 22px;
+        border-radius: 20px;
+        border: 1px dashed var(--line);
+        color: var(--muted);
+      }
+
+      @media (min-width: 900px) {
+        .account-card,
+        .delegate-card {
+          grid-column: span 6;
+        }
+
+        .proposals-card {
+          grid-column: span 12;
+        }
+      }
+
+      @media (max-width: 700px) {
+        .hero-top,
+        .controls,
+        .stats,
+        .proposal-head {
+          grid-template-columns: 1fr;
+          display: grid;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hero">
+        <div class="hero-top">
+          <div>
+            <div class="hero-chip" id="networkLabel">Network: not connected</div>
+            <h1>DAO Governance Dashboard</h1>
+          </div>
+          <button class="primary" id="connectButton">Connect MetaMask</button>
+        </div>
+        <p>
+          Connect a wallet, inspect voting power, delegate governance rights, and cast votes on live
+          proposals controlled by the Governor + Timelock contracts.
+        </p>
+      </section>
+
+      <section class="grid">
+        <article class="card account-card">
+          <h2>Account Snapshot</h2>
+          <div class="stats">
+            <div class="stat">
+              <span class="stat-label">Wallet</span>
+              <span class="mono" id="walletAddress">Not connected</span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">Token Balance</span>
+              <span id="tokenBalance">-</span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">Voting Power</span>
+              <span id="votingPower">-</span>
+            </div>
+          </div>
+          <div class="status mono" id="delegateAddress">Delegate: -</div>
+        </article>
+
+        <article class="card delegate-card">
+          <h2>Delegate Votes</h2>
+          <div class="controls">
+            <input
+              id="delegateInput"
+              type="text"
+              placeholder="0xDelegateAddress"
+              autocomplete="off"
+            />
+            <button class="primary" id="delegateButton">Delegate</button>
+          </div>
+          <div class="status" id="delegateStatus"></div>
+        </article>
+
+        <article class="card proposals-card">
+          <div class="hero-top" style="padding: 0; background: transparent; box-shadow: none;">
+            <div>
+              <h2>Recent Proposals</h2>
+              <p style="margin: 0; color: var(--muted);">
+                Active proposals show voting controls. Finished proposals display tallies after the
+                voting window closes.
+              </p>
+            </div>
+            <button class="secondary" id="refreshButton">Refresh Proposals</button>
+          </div>
+          <div class="proposal-list" id="proposalList">
+            <div class="empty">Deploy the contracts and connect your wallet to load proposal data.</div>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.5/dist/ethers.umd.min.js"></script>
+    <script src="./config.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
